@@ -12,6 +12,7 @@ Cyber Quest is a **zero-dependency, single-file HTML game** that teaches Python 
 
 No installation. No server. No frameworks. Open `cyber-quest.html` in any modern browser and play.
 
+![Cyber Quest screenshot](Cyber_Quest.png)
 ---
 
 ## 🎮 Gameplay
