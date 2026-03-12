@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Quest – Defend the Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #080808;
+    --panel:   #0e0e0e;
+    --panel2:  #141414;
+    --border:  #2a2010;
+    --accent:  #c9a84c;
+    --accent2: #e8c96a;
+    --accent3: #f0d080;
+    --green:   #c9a84c;
+    --red:     #cc3333;
+    --gold:    #c9a84c;
+    --gold2:   #f0d080;
+    --text:    #e8dcc8;
+    --muted:   #6a5c3a;
+    --glow:    0 0 24px rgba(201,168,76,0.45);
+    --glow2:   0 0 24px rgba(240,208,128,0.35);
+    --gold-gradient: linear-gradient(135deg, #b8860b 0%, #c9a84c 35%, #f0d080 60%, #c9a84c 80%, #8b6914 100%);
+    --gold-gradient-h: linear-gradient(90deg, #8b6914 0%, #c9a84c 30%, #f0d080 50%, #c9a84c 70%, #8b6914 100%);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse at 15% 40%, rgba(201,168,76,0.04) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 20%, rgba(240,208,128,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 90%, rgba(139,105,20,0.05) 0%, transparent 50%);
+    pointer-events:none; z-index:0;
+  }
+  .screen { display:none; position:relative; z-index:1; }
+  .screen.active { display:flex; }
+
+  /* WELCOME */
+  #welcome { min-height:100vh; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; }
+  .logo-wrap { margin-bottom:30px; }
+  .logo-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(18px, 4vw, 38px);
+    background: var(--gold-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(201,168,76,0.5));
+    letter-spacing: 5px; line-height: 1.4;
+  }
+  .logo-sub {
+    font-family: 'Cinzel', serif; font-size: clamp(8px, 1.5vw, 12px);
+    color: var(--muted); margin-top: 14px; letter-spacing: 4px; text-transform: uppercase;
+  }
+  .snake-emoji { font-size:64px; display:block; margin-bottom:16px; animation:float 3s ease-in-out infinite; filter:drop-shadow(0 0 16px rgba(201,168,76,0.6)); }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .hero-desc { max-width:560px; font-size:18px; color:#7a6a4a; line-height:1.8; margin-bottom:36px; }
+  .hero-desc span { color:var(--accent3); font-weight:700; }
+
+  .level-cards { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-bottom:40px; max-width:800px; }
+  .level-card {
+    background: linear-gradient(160deg, #111 0%, #0c0c0c 100%);
+    border:1px solid #2a2010; border-radius:4px; padding:22px 24px; width:165px;
+    cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;
+  }
+  .level-card::after { content:''; position:absolute; top:0; right:0; width:40px; height:40px; background:linear-gradient(225deg,rgba(201,168,76,0.15) 0%,transparent 60%); pointer-events:none; }
+  .level-card::before { content:''; position:absolute; inset:0; opacity:0; transition:opacity 0.3s; border-radius:4px; background:linear-gradient(160deg,rgba(201,168,76,0.06) 0%,transparent 70%); }
+  .level-card:hover { transform:translateY(-5px); border-color:var(--accent); box-shadow:0 8px 32px rgba(201,168,76,0.2),inset 0 1px 0 rgba(201,168,76,0.1); }
+  .level-card:hover::before { opacity:1; }
+  .level-card .lc-icon { font-size:32px; margin-bottom:10px; display:block; }
+  .level-card .lc-name { font-family:'Cinzel',serif; font-size:8px; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.8; letter-spacing:1.5px; }
+  .level-card .lc-desc { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; }
+  .level-card.locked { opacity:0.35; cursor:not-allowed; }
+  .level-card.locked:hover { transform:none; box-shadow:none; border-color:#2a2010; }
+
+  .btn-start {
+    font-family:'Cinzel',serif; font-size:13px; letter-spacing:3px; text-transform:uppercase; font-weight:700;
+    background:var(--gold-gradient); color:#080808; border:none; border-radius:3px; padding:18px 48px;
+    cursor:pointer; box-shadow:0 0 30px rgba(201,168,76,0.4),inset 0 1px 0 rgba(255,255,255,0.2); transition:all 0.25s; position:relative; overflow:hidden;
+  }
+  .btn-start::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 50%); pointer-events:none; }
+  .btn-start:hover { transform:scale(1.05); box-shadow:0 0 50px rgba(201,168,76,0.6),inset 0 1px 0 rgba(255,255,255,0.25); }
+  .btn-start:active { transform:scale(0.98); }
+
+  /* GAME */
+  #game { height:100vh; flex-direction:column; overflow:hidden; }
+  .hud { display:flex; align-items:center; gap:14px; padding:10px 24px; background:#0a0a0a; border-bottom:1px solid #1e1700; flex-wrap:wrap; box-shadow:0 1px 0 rgba(201,168,76,0.08); }
+  .hud-logo { font-family:'Cinzel',serif; font-size:13px; letter-spacing:3px; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 0 8px rgba(201,168,76,0.4)); margin-right:6px; }
+  .hud-stat { display:flex; align-items:center; gap:8px; background:#0e0e0e; border:1px solid #2a2010; border-radius:3px; padding:6px 14px; font-size:14px; font-weight:600; }
+  .hud-stat .icon { font-size:15px; }
+  .hud-stat .val { background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:'Share Tech Mono',monospace; font-weight:700; }
+  .hud-stat .label { color:var(--muted); font-size:11px; letter-spacing:1px; }
+  .xp-bar-wrap { flex:1; min-width:120px; background:#0e0e0e; border:1px solid #2a2010; border-radius:3px; padding:5px 14px; display:flex; align-items:center; gap:10px; }
+  .xp-bar-bg { flex:1; height:6px; background:rgba(255,255,255,0.04); border-radius:2px; overflow:hidden; border:1px solid #2a2010; }
+  .xp-bar-fill { height:100%; background:var(--gold-gradient-h); border-radius:2px; transition:width 0.6s cubic-bezier(.34,1.56,.64,1); box-shadow:0 0 10px rgba(201,168,76,0.6); }
+  .xp-label { font-size:11px; color:var(--muted); white-space:nowrap; font-family:'Share Tech Mono',monospace; }
+
+  .game-body { display:grid; grid-template-columns:270px 1fr; flex:1; overflow:hidden; min-height:0; }
+  .sidebar { background:#090909; border-right:1px solid #1e1700; padding:20px 16px; overflow-y:auto; display:flex; flex-direction:column; gap:20px; }
+  .sidebar-section {}
+  .sidebar-title { font-family:'Cinzel',serif; font-size:8px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #1e1700; }
+  .challenge-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:3px; cursor:pointer; transition:all 0.2s; border:1px solid transparent; margin-bottom:4px; }
+  .challenge-nav-item:hover { background:rgba(201,168,76,0.05); border-color:rgba(201,168,76,0.2); }
+  .challenge-nav-item.active { background:rgba(201,168,76,0.08); border-color:rgba(201,168,76,0.35); }
+  .challenge-nav-item.done { opacity:0.55; }
+  .challenge-nav-item .ch-icon { font-size:18px; }
+  .challenge-nav-item .ch-info { flex:1; min-width:0; }
+  .challenge-nav-item .ch-name { font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .challenge-nav-item .ch-pts { font-size:11px; color:var(--muted); }
+  .challenge-nav-item .ch-check { font-size:15px; }
+
+  .character-box { background:linear-gradient(160deg,#111 0%,#0c0c0c 100%); border:1px solid #2a2010; border-radius:4px; padding:16px; text-align:center; box-shadow:inset 0 1px 0 rgba(201,168,76,0.08); }
+  .char-avatar { font-size:48px; margin-bottom:8px; filter:drop-shadow(0 0 12px rgba(201,168,76,0.4)); }
+  .char-name { font-family:'Cinzel',serif; font-size:9px; letter-spacing:2px; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .char-title { font-size:12px; color:var(--muted); margin-top:4px; }
+  .char-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+  .char-stat { background:rgba(0,0,0,0.4); border-radius:3px; padding:6px; text-align:center; border:1px solid #1e1700; }
+  .char-stat .cs-val { font-family:'Share Tech Mono',monospace; font-size:16px; font-weight:700; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .char-stat .cs-label { font-size:10px; color:var(--muted); letter-spacing:1px; }
+  .badge-grid { display:flex; flex-wrap:wrap; gap:6px; }
+  .badge { width:36px; height:36px; border-radius:3px; background:#0e0e0e; border:1px solid #2a2010; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:help; transition:all 0.2s; }
+  .badge.earned { border-color:var(--gold); box-shadow:0 0 12px rgba(201,168,76,0.35),inset 0 1px 0 rgba(201,168,76,0.1); background:linear-gradient(160deg,#1a1500 0%,#0e0e0e 100%); }
+  .badge.locked { opacity:0.25; filter:grayscale(1); }
+
+  .main-area { display:flex; flex-direction:column; overflow:hidden; height:100%; }
+  .challenge-header { padding:18px 28px 14px; border-bottom:1px solid #1e1700; background:#0a0a0a; box-shadow:0 1px 0 rgba(201,168,76,0.06); }
+  .ch-breadcrumb { font-size:11px; color:var(--muted); margin-bottom:8px; letter-spacing:1px; font-family:'Share Tech Mono',monospace; }
+  .ch-breadcrumb span { color:var(--accent); }
+  .ch-title-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .ch-emoji { font-size:26px; }
+  .ch-title { font-family:'Cinzel',serif; font-size:clamp(11px,2vw,17px); color:var(--text); line-height:1.4; letter-spacing:1.5px; }
+  .ch-badge { padding:4px 12px; border-radius:2px; font-size:10px; font-weight:700; font-family:'Share Tech Mono',monospace; letter-spacing:1px; }
+  .badge-easy   { background:rgba(201,168,76,0.12); color:var(--accent2); border:1px solid rgba(201,168,76,0.3); }
+  .badge-medium { background:rgba(240,208,128,0.1); color:var(--accent3); border:1px solid rgba(240,208,128,0.25); }
+  .badge-hard   { background:rgba(180,120,20,0.15); color:#d4960a; border:1px solid rgba(180,120,20,0.35); }
+  .badge-expert { background:rgba(201,168,76,0.18); color:var(--gold2); border:1px solid rgba(201,168,76,0.5); box-shadow:0 0 8px rgba(201,168,76,0.2); }
+
+  /* TABS */
+  .tab-bar { display:flex; background:#090909; border-bottom:1px solid #1e1700; flex-shrink:0; }
+  .tab-btn { font-family:'Cinzel',serif; font-size:9px; letter-spacing:2px; padding:14px 22px; background:none; border:none; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.2s; display:flex; align-items:center; gap:8px; white-space:nowrap; text-transform:uppercase; }
+  .tab-btn:hover { color:var(--accent2); background:rgba(201,168,76,0.03); }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); background:rgba(201,168,76,0.05); }
+  .tab-btn .tab-num { width:18px; height:18px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid #2a2010; display:flex; align-items:center; justify-content:center; font-size:9px; }
+  .tab-btn.active .tab-num { background:var(--gold-gradient); color:#000; border:none; font-weight:700; }
+  .tab-panels { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
+  .tab-panel { display:none; flex:1; overflow:hidden; flex-direction:column; min-height:0; }
+  .tab-panel.active { display:flex; }
+
+  /* BRIEFING */
+  .lesson-panel-inner { flex:1; overflow-y:auto; padding:18px 24px 20px; display:flex; flex-direction:column; gap:14px; }
+  .story-box { background:linear-gradient(160deg,#0f0f0f 0%,#0a0a0a 100%); border:1px solid #2a2010; border-left:3px solid var(--accent); border-radius:0 4px 4px 0; padding:14px 18px; font-size:14px; line-height:1.8; color:var(--text); flex-shrink:0; box-shadow:inset 0 1px 0 rgba(201,168,76,0.05); }
+  .story-box .narrator { font-size:9px; letter-spacing:3px; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-family:'Share Tech Mono',monospace; margin-bottom:6px; text-transform:uppercase; }
+  .lesson-cards-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; flex-shrink:0; }
+  @media(max-width:900px){ .lesson-cards-row{ grid-template-columns:1fr; } }
+  .lesson-box, .mission-box { background:linear-gradient(160deg,#111 0%,#0d0d0d 100%); border:1px solid #2a2010; border-radius:4px; padding:14px 18px; box-shadow:inset 0 1px 0 rgba(201,168,76,0.04); }
+  .box-title { font-family:'Cinzel',serif; font-size:8px; letter-spacing:2px; text-transform:uppercase; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .code-example { font-family:'Share Tech Mono',monospace; font-size:13px; background:#050505; border:1px solid #2a2010; border-radius:3px; padding:12px; color:#c9a84c; line-height:1.7; overflow-x:auto; white-space:pre-wrap; margin-top:8px; box-shadow:inset 0 0 20px rgba(0,0,0,0.5); }
+  .lesson-text { font-size:14px; color:var(--text); line-height:1.7; margin-bottom:8px; }
+  .lesson-cta { display:flex; justify-content:center; padding:4px 0 8px; flex-shrink:0; }
+  .btn-go-challenge { font-family:'Cinzel',serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; background:var(--gold-gradient); color:#080808; border:none; border-radius:3px; padding:14px 40px; cursor:pointer; font-weight:700; box-shadow:0 0 25px rgba(201,168,76,0.35),inset 0 1px 0 rgba(255,255,255,0.2); transition:all 0.2s; }
+  .btn-go-challenge:hover { transform:scale(1.04); box-shadow:0 0 40px rgba(201,168,76,0.55),inset 0 1px 0 rgba(255,255,255,0.25); }
+
+  /* MISSION */
+  .challenge-panel-inner { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:14px 24px 16px; gap:10px; min-height:0; }
+  .mission-strip { background:linear-gradient(160deg,#111 0%,#0d0d0d 100%); border:1px solid #2a2010; border-left:3px solid var(--accent2); border-radius:0 4px 4px 0; padding:10px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .mission-strip .ms-label { font-family:'Cinzel',serif; font-size:8px; letter-spacing:2px; text-transform:uppercase; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; white-space:nowrap; }
+  .mission-strip .ms-text { font-size:14px; color:var(--text); line-height:1.4; font-weight:600; }
+  .editor-section { background:#0a0a0a; border:1px solid #2a2010; border-radius:4px; overflow:hidden; display:flex; flex-direction:column; flex:1; min-height:0; }
+  .editor-topbar { display:flex; align-items:center; gap:8px; padding:9px 14px; background:#060606; border-bottom:1px solid #1e1700; flex-shrink:0; }
+  .dot { width:11px; height:11px; border-radius:50%; }
+  .dot-r{background:#cc3333;} .dot-y{background:#c9a84c;} .dot-g{background:#8b6914;}
+  .editor-filename { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--muted); margin-left:6px; }
+  .editor-actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .btn-run { font-family:'Cinzel',serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; background:var(--gold-gradient); color:#080808; border:none; border-radius:3px; padding:8px 16px; cursor:pointer; transition:all 0.2s; font-weight:700; box-shadow:0 0 14px rgba(201,168,76,0.3); }
+  .btn-run:hover { transform:scale(1.05); box-shadow:0 0 24px rgba(201,168,76,0.5); }
+  .btn-reset, .hint-inline-btn { font-size:11px; background:none; border:1px solid #2a2010; color:var(--muted); border-radius:3px; padding:6px 11px; cursor:pointer; font-family:'Rajdhani',sans-serif; transition:all 0.2s; }
+  .btn-reset:hover { border-color:var(--accent); color:var(--accent); }
+  .hint-inline-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+  #code-editor { width:100%; flex:1; min-height:0; background:#050505; color:#c9a84c; font-family:'Share Tech Mono',monospace; font-size:14px; line-height:1.7; border:none; outline:none; padding:14px; resize:none; tab-size:4; caret-color:var(--accent2); }
+  .output-section { border-top:1px solid #1e1700; padding:9px 14px; background:#060606; flex-shrink:0; }
+  .output-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:3px; letter-spacing:2px; }
+  #output-display { font-family:'Share Tech Mono',monospace; font-size:13px; line-height:1.5; white-space:pre-wrap; min-height:24px; max-height:68px; overflow-y:auto; }
+  .output-success { color:var(--accent2); }
+  .output-error   { color:var(--red); }
+  .output-info    { color:var(--muted); }
+
+  /* MCQ */
+  .mcq-challenge-wrap { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .mcq-options { display:flex; flex-direction:column; gap:10px; }
+  .mcq-option { background:linear-gradient(160deg,#111 0%,#0d0d0d 100%); border:1px solid #2a2010; border-radius:4px; padding:12px 16px; cursor:pointer; transition:all 0.2s; font-size:15px; display:flex; align-items:center; gap:12px; }
+  .mcq-option:hover { border-color:var(--accent); background:rgba(201,168,76,0.05); }
+  .mcq-option.selected { border-color:var(--accent2); background:rgba(201,168,76,0.08); }
+  .mcq-option.correct { border-color:var(--accent); background:rgba(201,168,76,0.12); color:var(--accent2); }
+  .mcq-option.wrong   { border-color:var(--red); background:rgba(180,30,30,0.1); color:var(--red); }
+  .mcq-letter { width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,0.4); border:1px solid #2a2010; display:flex; align-items:center; justify-content:center; font-family:'Share Tech Mono',monospace; font-size:12px; font-weight:700; flex-shrink:0; color:var(--muted); }
+  .fill-blank-input { background:#050505; border:1px solid #2a2010; border-radius:3px; padding:10px 16px; color:var(--accent2); font-family:'Share Tech Mono',monospace; font-size:15px; width:100%; margin-top:10px; outline:none; transition:border-color 0.2s; }
+  .fill-blank-input:focus { border-color:var(--accent); box-shadow:0 0 12px rgba(201,168,76,0.2); }
+  .hint-drawer { background:rgba(201,168,76,0.05); border:1px solid rgba(201,168,76,0.2); border-radius:4px; padding:10px 14px; font-size:13px; color:#7a6a4a; line-height:1.6; display:none; flex-shrink:0; }
+  .hint-drawer.show { display:block; }
+
+  /* FEEDBACK */
+  .feedback-panel { position:fixed; bottom:24px; right:24px; max-width:360px; width:calc(100vw - 48px); background:#0e0e0e; border-radius:4px; padding:20px; z-index:100; border:1px solid #2a2010; transform:translateY(120px); opacity:0; transition:all 0.4s cubic-bezier(.34,1.56,.64,1); pointer-events:none; }
+  .feedback-panel.show { transform:translateY(0); opacity:1; pointer-events:all; }
+  .feedback-panel.success { border-color:var(--accent); box-shadow:0 0 30px rgba(201,168,76,0.2),inset 0 1px 0 rgba(201,168,76,0.08); }
+  .feedback-panel.fail    { border-color:var(--red); box-shadow:0 0 30px rgba(180,30,30,0.2); }
+  .feedback-icon { font-size:36px; margin-bottom:8px; }
+  .feedback-title { font-family:'Cinzel',serif; font-size:13px; margin-bottom:8px; letter-spacing:2px; text-transform:uppercase; }
+  .feedback-panel.success .feedback-title { background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .feedback-panel.fail .feedback-title { color:var(--red); }
+  .feedback-msg { font-size:14px; color:var(--text); line-height:1.6; margin-bottom:14px; }
+  .feedback-xp { font-family:'Share Tech Mono',monospace; font-size:13px; margin-bottom:14px; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .btn-next { font-family:'Cinzel',serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; background:var(--gold-gradient); color:#080808; border:none; border-radius:3px; padding:10px 20px; cursor:pointer; width:100%; font-weight:700; transition:all 0.2s; box-shadow:0 0 14px rgba(201,168,76,0.3); }
+  .btn-next:hover { transform:scale(1.02); box-shadow:0 0 24px rgba(201,168,76,0.5); }
+
+  /* LEVEL UP */
+  .levelup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; z-index:200; opacity:0; pointer-events:none; transition:opacity 0.4s; }
+  .levelup-overlay.show { opacity:1; pointer-events:all; }
+  .levelup-box { text-align:center; padding:52px 64px; background:linear-gradient(160deg,#141200 0%,#0a0900 50%,#141200 100%); border:1px solid var(--accent); border-radius:4px; box-shadow:0 0 60px rgba(201,168,76,0.25),0 0 120px rgba(201,168,76,0.1),inset 0 1px 0 rgba(201,168,76,0.15); animation:popIn 0.5s cubic-bezier(.34,1.56,.64,1); position:relative; overflow:hidden; }
+  .levelup-box::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:var(--gold-gradient-h); }
+  .levelup-box::after  { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:var(--gold-gradient-h); }
+  @keyframes popIn { from{transform:scale(0.5)} to{transform:scale(1)} }
+  .levelup-stars { font-size:52px; margin-bottom:14px; animation:spin 3s linear infinite; filter:drop-shadow(0 0 16px rgba(201,168,76,0.7)); }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .levelup-title { font-family:'Cinzel Decorative',serif; font-size:clamp(14px,3vw,26px); background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 0 20px rgba(201,168,76,0.5)); margin-bottom:10px; letter-spacing:3px; }
+  .levelup-sub { font-size:18px; color:var(--text); margin-bottom:20px; }
+  .levelup-new { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--muted); margin-bottom:28px; letter-spacing:2px; }
+  .btn-continue { font-family:'Cinzel',serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; background:var(--gold-gradient); color:#080808; border:none; border-radius:3px; padding:14px 36px; cursor:pointer; font-weight:700; box-shadow:0 0 30px rgba(201,168,76,0.4),inset 0 1px 0 rgba(255,255,255,0.2); transition:all 0.2s; }
+  .btn-continue:hover { transform:scale(1.05); }
+
+  /* PARTICLES */
+  .particle { position:fixed; pointer-events:none; font-size:20px; z-index:300; animation:particle-anim 1s forwards; }
+  @keyframes particle-anim { 0%{transform:translateY(0) scale(1);opacity:1} 100%{transform:translateY(-80px) scale(0.2);opacity:0} }
+
+  /* PROGRESS DOTS */
+  .progress-dots { display:flex; gap:6px; padding:10px 28px; background:#090909; border-bottom:1px solid #1e1700; overflow-x:auto; }
+  .prog-dot { width:10px; height:10px; border-radius:50%; background:#1e1700; transition:all 0.3s; flex-shrink:0; cursor:pointer; border:1px solid #2a2010; }
+  .prog-dot.done   { background:var(--accent); box-shadow:0 0 8px rgba(201,168,76,0.5); border-color:var(--accent); }
+  .prog-dot.active { background:var(--accent2); box-shadow:0 0 12px rgba(240,208,128,0.6); transform:scale(1.4); border-color:var(--accent2); }
+
+  /* SAVE UI */
+  .save-banner { background:linear-gradient(160deg,#111 0%,#0c0c0c 100%); border:1px solid #2a2010; border-radius:4px; padding:14px 24px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; max-width:560px; width:100%; margin-bottom:20px; }
+  #save-info { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; width:100%; text-align:center; font-family:'Share Tech Mono',monospace; }
+  .save-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); display:inline-block; flex-shrink:0; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .save-date { color:#2a2010; font-size:12px; }
+  .btn-continue-save { font-family:'Cinzel',serif; font-size:11px; letter-spacing:2px; text-transform:uppercase; background:var(--gold-gradient); color:#080808; border:none; border-radius:3px; padding:14px 28px; cursor:pointer; font-weight:700; box-shadow:0 0 25px rgba(201,168,76,0.35); transition:all 0.2s; display:flex; align-items:center; gap:10px; }
+  .btn-continue-save:hover { transform:scale(1.04); box-shadow:0 0 40px rgba(201,168,76,0.55); }
+  .btn-reset-save { font-size:11px; background:none; border:1px solid rgba(180,30,30,0.3); color:rgba(180,30,30,0.6); border-radius:3px; padding:6px 14px; cursor:pointer; font-family:'Rajdhani',sans-serif; transition:all 0.2s; display:inline-flex; align-items:center; gap:6px; }
+  .btn-reset-save:hover { border-color:var(--red); color:var(--red); }
+
+  /* MISC */
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:#080808; }
+  ::-webkit-scrollbar-thumb { background:#2a2010; border-radius:2px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--muted); }
+  @media(max-width:768px) { .game-body{grid-template-columns:1fr;} .sidebar{display:none;} }
+  .typing::after { content:'|'; animation:blink 0.8s step-end infinite; color:var(--accent); }
+  @keyframes blink { 50%{opacity:0} }
+  .streak-fire { animation:fireShake 0.5s ease-in-out infinite alternate; }
+  @keyframes fireShake { 0%{transform:rotate(-5deg) scale(1)} 100%{transform:rotate(5deg) scale(1.1)} }
+</style>
+</head>
+<body>
+
+<!-- ===== WELCOME SCREEN ===== -->
+<div id="welcome" class="screen active">
+  <div class="logo-wrap">
+    <span class="snake-emoji">🛡️</span>
+    <div class="logo-title">CYBER QUEST</div>
+    <div class="logo-sub">⚡ DEFEND THE NETWORK. STOP THE HACK. ⚡</div>
+  </div>
+
+  <p class="hero-desc">
+    A rogue hacker collective known as <span>GHOST//BYTE</span> is attacking the grid.
+    Learn <span>Python</span> to fight back — write real code to
+    patch firewalls, decrypt signals, and <span>stop the breach</span> before it's too late.
+  </p>
+
+  <div class="level-cards">
+    <div class="level-card" onclick="startGame('beginner')">
+      <div class="lc-icon">🖥️</div>
+      <div class="lc-name">SCRIPT ROOKIE</div>
+      <div class="lc-desc">Alerts, variables, basic recon</div>
+    </div>
+    <div class="level-card" onclick="startGame('apprentice')">
+      <div class="lc-icon">🔐</div>
+      <div class="lc-name">CYBER APPRENTICE</div>
+      <div class="lc-desc">Firewalls, loops, access control</div>
+    </div>
+    <div class="level-card locked">
+      <div class="lc-icon">⚔️</div>
+      <div class="lc-name">CODE DEFENDER</div>
+      <div class="lc-desc">Encryption, data structures</div>
+    </div>
+    <div class="level-card locked">
+      <div class="lc-icon">💀</div>
+      <div class="lc-name">ELITE HACKER</div>
+      <div class="lc-desc">Advanced ops, full takedown</div>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="startGame('beginner')">
+    ⚡ DEPLOY AGENT
+  </button>
+
+  <!-- Save state UI -->
+  <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; max-width:560px;">
+    <button class="btn-continue-save" id="btn-continue-save" style="display:none; width:100%; justify-content:center;" onclick="continueGame()">
+      <span class="continue-label">▶ RESUME MISSION</span>
+    </button>
+    <div id="save-info" style="display:none;"></div>
+    <button class="btn-reset-save" id="btn-reset-save" style="display:none;" onclick="confirmReset()">
+      🗑️ Wipe Agent Data
+    </button>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game" class="screen">
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-logo">🛡️ CQ</div>
+    <div class="hud-stat">
+      <span class="icon">⭐</span>
+      <span class="val" id="hud-level">1</span>
+      <span class="label">LEVEL</span>
+    </div>
+    <div class="hud-stat">
+      <span class="icon">💰</span>
+      <span class="val" id="hud-xp">0</span>
+      <span class="label">XP</span>
+    </div>
+    <div class="hud-stat">
+      <span class="icon">🔥</span>
+      <span class="val" id="hud-streak">0</span>
+      <span class="label">STREAK</span>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-bg">
+        <div class="xp-bar-fill" id="xp-bar" style="width:0%"></div>
+      </div>
+      <div class="xp-label" id="xp-label">0 / 100 XP</div>
+    </div>
+    <div class="hud-stat" style="cursor:pointer" onclick="showWelcome()">
+      <span class="icon">🏠</span>
+      <span class="label">MENU</span>
+    </div>
+    <div class="hud-stat" style="cursor:pointer" onclick="showResetModal()" title="Reset Progress">
+      <span class="icon">🔄</span>
+      <span class="label">RESET</span>
+    </div>
+    <div class="hud-stat" style="cursor:pointer" onclick="toggleSound()" id="sound-toggle" title="Toggle Sound">
+      🔊
+    </div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress-dots" id="progress-dots"></div>
+
+  <!-- Body -->
+  <div class="game-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="character-box">
+        <div class="char-avatar" id="char-avatar">🐣</div>
+        <div class="char-name" id="char-name">NOVICE CODER</div>
+        <div class="char-title" id="char-title">The Python Apprentice</div>
+        <div class="char-stats">
+          <div class="char-stat">
+            <div class="cs-val" id="stat-solved">0</div>
+            <div class="cs-label">Solved</div>
+          </div>
+          <div class="char-stat">
+            <div class="cs-val" id="stat-streak">0</div>
+            <div class="cs-label">Best Streak</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">📡 Mission Log</div>
+        <div id="challenge-nav"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">🏆 Badges</div>
+        <div class="badge-grid" id="badge-grid"></div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-area">
+      <div class="challenge-header">
+        <div class="ch-breadcrumb">Sector 1 › <span id="ch-world-name">Boot Camp</span></div>
+        <div class="ch-title-row">
+          <div class="ch-emoji" id="ch-emoji">🌟</div>
+          <div class="ch-title" id="ch-title">Loading...</div>
+          <div class="ch-badge badge-easy" id="ch-badge">EASY</div>
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-lesson-btn" onclick="switchTab('lesson')">
+          <span class="tab-icon">📡</span> BRIEFING
+          <span class="tab-num">1</span>
+        </button>
+        <button class="tab-btn" id="tab-challenge-btn" onclick="switchTab('challenge')">
+          <span class="tab-icon">💻</span> MISSION
+          <span class="tab-num">2</span>
+        </button>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="tab-panels">
+
+        <!-- LESSON TAB -->
+        <div class="tab-panel active" id="tab-lesson">
+          <div class="lesson-panel-inner" id="lesson-content">
+            <!-- Rendered dynamically -->
+          </div>
+          <div class="lesson-cta">
+            <button class="btn-go-challenge" onclick="switchTab('challenge')">
+              💻 START MISSION →
+            </button>
+          </div>
+        </div>
+
+        <!-- CHALLENGE TAB -->
+        <div class="tab-panel" id="tab-challenge">
+          <div class="challenge-panel-inner" id="challenge-content">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Panel -->
+<div class="feedback-panel" id="feedback-panel">
+  <div class="feedback-icon" id="fb-icon">✅</div>
+  <div class="feedback-title" id="fb-title">CORRECT!</div>
+  <div class="feedback-msg" id="fb-msg"></div>
+  <div class="feedback-xp" id="fb-xp">+25 XP</div>
+  <button class="btn-next" id="btn-next" onclick="nextChallenge()">▶ NEXT CHALLENGE</button>
+</div>
+
+<!-- Level Up Overlay -->
+<div class="levelup-overlay" id="levelup-overlay">
+  <div class="levelup-box">
+    <div class="levelup-stars">⚡</div>
+    <div class="levelup-title">CLEARANCE UPGRADED!</div>
+    <div class="levelup-sub" id="lu-sub">You've reached Level 2!</div>
+    <div class="levelup-new" id="lu-new">New missions unlocked!</div>
+    <button class="btn-continue" onclick="dismissLevelUp()">CONTINUE MISSION ▶</button>
+  </div>
+</div>
+
+<script>
+// ===== CHALLENGE DATA =====
+const CHALLENGES = [
+  // SECTOR 1: BOOT CAMP
+  {
+    id:1, world:'Boot Camp', worldNum:1,
+    emoji:'🚨', title:'Broadcast the Alert!',
+    difficulty:'EASY', xp:20, type:'code',
+    story:'INCOMING TRANSMISSION: The GHOST//BYTE collective has been detected probing our outer network. Agent, your first task is simple but critical — broadcast an emergency alert to all terminals across the grid. Use the print command to send the message NOW.',
+    lesson:`The <code>print()</code> function sends output to the terminal.\n\nExample:`,
+    code_example:`print("ALERT: Intruder detected!")`,
+    task:'Broadcast this exact message: HACK DETECTED. DEFEND NOW.',
+    starter:`# Broadcast your alert to the terminal\n`,
+    check: (out) => out.trim() === 'HACK DETECTED. DEFEND NOW.',
+    hint:'Use print("HACK DETECTED. DEFEND NOW.") — match the message exactly!',
+    successMsg:'📡 Alert broadcast! Every terminal on the grid received your message. print() is your primary comms tool!',
+    failMsg:'Message mismatch. The system requires an exact match. Try: print("HACK DETECTED. DEFEND NOW.")'
+  },
+  {
+    id:2, world:'Boot Camp', worldNum:1,
+    emoji:'🗄️', title:'Secure the Intel',
+    difficulty:'EASY', xp:25, type:'code',
+    story:'Our reconnaissance unit intercepted a hacker\'s callsign. We need to store it securely in our database. "Variables are like encrypted containers," says your handler. "Lock the callsign inside one, then read it back to confirm."',
+    lesson:`Variables store data — like a secure container with a label.`,
+    code_example:`callsign = "GHOST"\nprint(callsign)`,
+    task:'Create a variable called agent and set it to your codename, then print it.',
+    starter:`# Store your agent codename here\nagent = \nprint(agent)`,
+    check: (out) => out.trim().length > 0 && !out.includes('Error') && !out.includes('='),
+    hint:'Try: agent = "YourCodename" then print(agent)',
+    successMsg:'🗄️ Intel secured! The database has your agent profile. Variables store all critical data in Python!',
+    failMsg:'Assignment incomplete. Try: agent = "YourCodename" — give it a string value in quotes!'
+  },
+  {
+    id:3, world:'Boot Camp', worldNum:1,
+    emoji:'🔢', title:'Crack the Access Code',
+    difficulty:'EASY', xp:30, type:'mcq',
+    story:'The vault door is protected by a math-based cipher. Your handler transmits the formula: "10 + 5 * 2". The result is the access code. What does Python calculate it as? Get this wrong and the vault locks permanently.',
+    lesson:`Python follows standard math order of operations (PEMDAS):\n- Multiplication/Division first\n- Then Addition/Subtraction`,
+    code_example:`access_code = 10 + 5 * 2\nprint(access_code)  # What does this print?`,
+    task:'What does print(10 + 5 * 2) output?',
+    options:['25', '20', '30', '15'],
+    answer:1,
+    hint:'Multiply first! 5 * 2 = 10, then 10 + 10 = 20',
+    successMsg:'🔓 Vault unlocked! Python follows PEMDAS — multiplication before addition. Access granted!',
+    failMsg:'Access denied. Remember: multiply first! 5×2=10, then 10+10=20. The code is 20.'
+  },
+  {
+    id:4, world:'Boot Camp', worldNum:1,
+    emoji:'🪪', title:'Forge the Credentials',
+    difficulty:'EASY', xp:30, type:'code',
+    story:'To infiltrate the hacker\'s server, you need a forged login credential. It must combine a username and a domain with an @ symbol. "Use string concatenation," your handler explains. "Join the parts together to form the full identity."',
+    lesson:`Join strings together using + (concatenation)`,
+    code_example:`first = "agent"\ndomain = "@cybercorp.net"\nprint(first + domain)`,
+    task:'Combine username and domain to print the full credential: ghost@darkweb.io',
+    starter:`username = "ghost"\ndomain = "@darkweb.io"\n# Print them combined\n`,
+    check: (out) => out.trim() === 'ghost@darkweb.io',
+    hint:'Use: print(username + domain)',
+    successMsg:'🪪 Credentials forged! String concatenation joins pieces of text — essential for building dynamic messages!',
+    failMsg:'Credential malformed. Try: print(username + domain) — they should join with no space!'
+  },
+  {
+    id:5, world:'Boot Camp', worldNum:1,
+    emoji:'🚦', title:'Read the Security Flag',
+    difficulty:'EASY', xp:35, type:'mcq',
+    story:'The intrusion detection system uses security flags — values that are either ON or OFF, ACTIVE or INACTIVE. Your handler asks: "What data type are True and False in Python? Knowing this is critical for writing access control logic."',
+    task:'What is the data type of True and False in Python?',
+    options:['String', 'Integer', 'Boolean', 'Float'],
+    answer:2,
+    lesson:`Python data types:\n- str: text ("ALERT")\n- int: whole numbers (404)\n- float: decimals (3.14)\n- bool: True or False (flags!)`,
+    code_example:`threat_active = True\nprint(type(threat_active))  # <class 'bool'>`,
+    hint:'Think ON/OFF, YES/NO — a special type for binary states...',
+    successMsg:'🚦 Flag type confirmed! Booleans power all security checks — every if statement uses them!',
+    failMsg:'Security flags are Booleans! True/False is a dedicated data type, not a string or number.'
+  },
+
+  // SECTOR 2: FIREWALL PROTOCOL
+  {
+    id:6, world:'Firewall Protocol', worldNum:2,
+    emoji:'🔒', title:'Set the Access Gate',
+    difficulty:'EASY', xp:35, type:'code',
+    story:'The server\'s access gate is down! GHOST//BYTE operatives with clearance levels of 60 or below are flooding through. You must write the gate logic NOW: only agents with clearance above 60 may enter. Every second counts.',
+    lesson:`if statements control access based on conditions:`,
+    code_example:`clearance = 75\nif clearance > 60:\n    print("Access granted!")`,
+    task:'Write code: if clearance is above 60, print "Access granted. You may enter."',
+    starter:`clearance = 75\n# Write your if statement below\n`,
+    check: (out) => out.trim().includes('Access granted'),
+    hint:'if clearance > 60: then indent and print("Access granted. You may enter.")',
+    successMsg:'🔒 Gate secured! if statements are the backbone of all access control systems!',
+    failMsg:'Gate logic failed. Try:\nif clearance > 60:\n    print("Access granted. You may enter.")'
+  },
+  {
+    id:7, world:'Firewall Protocol', worldNum:2,
+    emoji:'🛂', title:'Two-Factor Authorization',
+    difficulty:'EASY', xp:40, type:'code',
+    story:'The inner server has two outcomes: agents with auth_level 18 or above are cleared to enter the Operations Room. Everyone below that threshold gets redirected to Basic Training. Write the two-path authorization check — there are NO exceptions.',
+    lesson:`if/else handles two possible outcomes:`,
+    code_example:`auth_level = 20\nif auth_level >= 18:\n    print("Cleared for ops!")\nelse:\n    print("Redirected to training.")`,
+    task:'Write if/else: if auth_level >= 18 print "CLEARED: Access to Ops Room.", else print "DENIED: Report to training."',
+    starter:`auth_level = 16\n# Write your if/else below\n`,
+    check: (out) => out.trim() === 'DENIED: Report to training.',
+    hint:'if auth_level >= 18: print CLEARED... else: print DENIED...',
+    successMsg:'🛂 Two-factor check passed! if/else covers every possible case — no agent slips through unchecked!',
+    failMsg:'Check your else clause. With auth_level=16, it should print "DENIED: Report to training."'
+  },
+  {
+    id:8, world:'Firewall Protocol', worldNum:2,
+    emoji:'📡', title:'Scan the Ports',
+    difficulty:'MEDIUM', xp:50, type:'code',
+    story:'GHOST//BYTE is hiding on one of 5 network ports. You must run a sequential port scan — checking port 1 through port 5 in order. Any gap in the scan and the hacker escapes. Deploy the loop protocol!',
+    lesson:`for loops repeat an action automatically:`,
+    code_example:`for port in range(5):\n    print(port)  # prints 0,1,2,3,4`,
+    task:'Use a for loop to scan and print port numbers 1 through 5 (one per line).',
+    starter:`# Write your port scanner here\n`,
+    check: (out) => out.trim() === '1\n2\n3\n4\n5',
+    hint:'for i in range(1, 6): then print(i) — range(1,6) goes from 1 to 5!',
+    successMsg:'📡 All ports scanned! for loops are how security tools automate repetitive checks across entire networks!',
+    failMsg:'Scan incomplete. Use range(1, 6) to start at 1:\nfor i in range(1, 6):\n    print(i)'
+  },
+  {
+    id:9, world:'Firewall Protocol', worldNum:2,
+    emoji:'👁️', title:'Threat Monitor Loop',
+    difficulty:'MEDIUM', xp:45, type:'fillblank',
+    story:'The threat monitor must keep running as long as the network is under attack. You find a broken monitoring script with a missing keyword. Fill in the blank to keep the watchdog alive — without it, the entire defense grid goes dark.',
+    lesson:`while loops keep running as long as a condition is True:`,
+    code_example:`threat_level = 0\nwhile threat_level < 3:\n    print(threat_level)\n    threat_level += 1`,
+    task:'Complete: _____ threat_active < 5: (what keyword starts this continuous monitor?)',
+    blank_prefix:'',
+    blank_suffix:' threat_active < 5:',
+    answer:'while',
+    hint:'This loop keeps running WHILE the threat is active...',
+    successMsg:'👁️ Monitor online! while loops keep security systems running until the threat is neutralized!',
+    failMsg:'The keyword is "while" — while loops run continuously as long as the condition stays True!'
+  },
+
+  // SECTOR 3: ENCRYPTION DIVISION
+  {
+    id:10, world:'Encryption Division', worldNum:3,
+    emoji:'🔑', title:'Deploy Encryption Protocol',
+    difficulty:'MEDIUM', xp:55, type:'code',
+    story:'The comms channel is exposed. GHOST//BYTE is intercepting all plain-text messages. You need to deploy a reusable encryption protocol — a function called encrypt — that can be triggered any time a message needs to be secured.',
+    lesson:`Functions are reusable blocks of code you can deploy on demand:`,
+    code_example:`def encrypt():\n    print("Encrypting...")\n\nencrypt()  # Deploy it!`,
+    task:'Define a function called "encrypt" that prints "Encryption active. Channel secured." then call it.',
+    starter:`# Define your encryption function here\n\n# Deploy (call) it here\n`,
+    check: (out) => out.trim() === 'Encryption active. Channel secured.',
+    hint:'def encrypt(): then indent the print(), then call encrypt() on its own line',
+    successMsg:'🔑 Protocol deployed! Functions let you package logic once and deploy it anywhere — the foundation of all security tools!',
+    failMsg:'Deployment failed. Check:\n1) def encrypt():\n2) indent print("Encryption active. Channel secured.")\n3) call encrypt()'
+  },
+  {
+    id:11, world:'Encryption Division', worldNum:3,
+    emoji:'📟', title:'Personalized Threat Alert',
+    difficulty:'MEDIUM', xp:60, type:'code',
+    story:'Generic alerts are being ignored. Intelligence suggests personalized warnings are 10x more effective. Write an alert function that accepts any agent\'s codename and sends them a targeted warning. The grid is counting on you.',
+    lesson:`Parameters make functions work for any input:`,
+    code_example:`def alert(agent):\n    print("WARNING, " + agent + ": threat detected!")\n\nalert("Ghost")  # WARNING, Ghost: threat detected!`,
+    task:'Write alert(agent) that prints "ALERT, [agent]: you are compromised." Call it with "Zero".',
+    starter:`# Write your alert function with parameter\n\n# Call with "Zero"\n`,
+    check: (out) => out.trim() === 'ALERT, Zero: you are compromised.',
+    hint:'def alert(agent): print("ALERT, " + agent + ": you are compromised.") then alert("Zero")',
+    successMsg:'📟 Personalized alert sent! Parameters make your functions adaptable to any target — true cyber versatility!',
+    failMsg:'Try:\ndef alert(agent):\n    print("ALERT, " + agent + ": you are compromised.")\nalert("Zero")'
+  },
+  {
+    id:12, world:'Encryption Division', worldNum:3,
+    emoji:'📤', title:'Exfiltrate the Data',
+    difficulty:'MEDIUM', xp:65, type:'mcq',
+    story:'An intelligence function runs deep in the server — but what does it actually DO with the data it finds? Your mission debrief requires you to answer: what does the return keyword do in Python? Get it wrong and the extraction fails.',
+    task:'What does the return keyword do in a Python function?',
+    options:[
+      'Prints a value to the terminal',
+      'Sends a value back to where the function was called',
+      'Shuts down the entire program',
+      'Creates a new encrypted variable'
+    ],
+    answer:1,
+    lesson:`return sends data back out of a function:`,
+    code_example:`def scan_threat(level):\n    return level * 2\n\nresult = scan_threat(5)  # result = 10`,
+    hint:'Think about what you get BACK when you call a function...',
+    successMsg:'📤 Data exfiltrated! return passes results back to the caller — how functions share their findings!',
+    failMsg:'return sends a value BACK to wherever the function was called — it\'s how functions export their results!'
+  },
+
+  // SECTOR 4: DATA VAULT
+  {
+    id:13, world:'Data Vault', worldNum:4,
+    emoji:'🚫', title:'Build the Blocklist',
+    difficulty:'MEDIUM', xp:55, type:'code',
+    story:'Three malicious IP addresses have been identified — 192.168.1.1, 10.0.0.5, and 172.16.0.3. They must be added to the blocklist immediately. Create the list and confirm the first blocked IP is loaded correctly.',
+    lesson:`Lists store multiple items in order:`,
+    code_example:`blocked = ["10.0.0.1", "192.168.0.5"]\nprint(blocked[0])  # 10.0.0.1`,
+    task:'Create a list called "blocklist" where the first IP is "192.168.1.1", then print the first entry.',
+    starter:`# Create your blocklist here\nblocklist = \n# Print the first blocked IP\n`,
+    check: (out) => out.trim() === '192.168.1.1',
+    hint:'blocklist = ["192.168.1.1", "10.0.0.5", "172.16.0.3"] then print(blocklist[0])',
+    successMsg:'🚫 Blocklist active! Lists hold ordered collections — IP blocklists, threat logs, agent rosters all use them!',
+    failMsg:'Use index 0 for the first item: print(blocklist[0]) — lists are 0-indexed!'
+  },
+  {
+    id:14, world:'Data Vault', worldNum:4,
+    emoji:'🔍', title:'Sweep the Blocklist',
+    difficulty:'MEDIUM', xp:65, type:'code',
+    story:'Every IP on the blocklist must be individually scanned and logged to the audit trail. A manual check would take hours. Deploy a loop to sweep through every entry automatically and print each one to the incident log.',
+    lesson:`Loop through a list to process each item:`,
+    code_example:`ips = ["10.0.0.1", "10.0.0.2"]\nfor ip in ips:\n    print(ip)`,
+    task:'Loop through blocklist = ["192.168.1.1", "10.0.0.5", "172.16.0.3"] and print each IP.',
+    starter:`blocklist = ["192.168.1.1", "10.0.0.5", "172.16.0.3"]\n# Loop and print each IP\n`,
+    check: (out) => out.trim() === '192.168.1.1\n10.0.0.5\n172.16.0.3',
+    hint:'for ip in blocklist: then print(ip)',
+    successMsg:'🔍 Sweep complete! Looping through lists automates what would take humans hours — this is how real security tools work!',
+    failMsg:'Try:\nfor ip in blocklist:\n    print(ip)'
+  },
+  {
+    id:15, world:'Data Vault', worldNum:4,
+    emoji:'🗂️', title:'Register the Operative',
+    difficulty:'HARD', xp:80, type:'code',
+    story:'A new undercover operative has been recruited. Their profile must be registered in the agent database — a structured record containing their codename and threat_score. Build the profile and verify the codename is stored correctly.',
+    lesson:`Dictionaries store structured data as key:value pairs:`,
+    code_example:`agent = {"codename": "Viper", "level": 5}\nprint(agent["codename"])  # Viper`,
+    task:'Create a dictionary "operative" with keys "codename" (set to "Phantom") and "threat_score". Print the codename.',
+    starter:`# Create your operative profile here\noperative = \n# Print the codename\n`,
+    check: (out) => out.trim() === 'Phantom',
+    hint:'operative = {"codename": "Phantom", "threat_score": 99} then print(operative["codename"])',
+    successMsg:'🗂️ Operative registered! Dictionaries are used in virtually every real system — user profiles, configs, threat intel all use them!',
+    failMsg:'Access dict values with the key: print(operative["codename"])'
+  },
+
+  // SECTOR 5: THE FINAL HACK
+  {
+    id:16, world:'The Final Hack', worldNum:5,
+    emoji:'🐛', title:'Patch the Firewall!',
+    difficulty:'HARD', xp:100, type:'code',
+    story:'💀 CRITICAL BREACH! GHOST//BYTE has corrupted the primary firewall. It should trigger "Firewall holding!" when threat_level > 50 — but the code is riddled with bugs. You have 60 seconds to find and fix all 3 errors before the network falls. GO.',
+    lesson:`Debug this corrupted firewall code — find and fix all 3 bugs:`,
+    code_example:`# CORRUPTED CODE:\nthreat_levl = 75\nif threat_levl > 50\n    print("Firewwall holding!")`,
+    task:'Fix the 3 bugs in the code above and run it to print "Firewall holding!"',
+    starter:`# Fix the 3 bugs below:\nthreat_levl = 75\nif threat_levl > 50\n    print("Firewwall holding!")`,
+    check: (out) => out.trim() === 'Firewall holding!',
+    hint:'1) Fix the variable name typo, 2) Add the missing colon after if, 3) Fix the typo in the print string',
+    successMsg:'🛡️ FIREWALL RESTORED! You found all 3 bugs! Debugging under pressure is the most critical skill in cybersecurity!',
+    failMsg:'Three bugs: variable name (threat_levl→threat_level), missing colon after if, typo (Firewwall→Firewall)!'
+  },
+  {
+    id:17, world:'The Final Hack', worldNum:5,
+    emoji:'💀', title:'The GHOST//BYTE Takedown',
+    difficulty:'EXPERT', xp:150, type:'code',
+    story:'🚨 FINAL MISSION. GHOST//BYTE\'s threat score is calculated from a list of individual attack vectors. Write a function that takes a list of threat scores and returns the total — this number determines whether we launch the counterstrike. The fate of the network rests on your code.',
+    lesson:`Combine everything: functions + loops + return`,
+    code_example:`def total_threat(scores):\n    total = 0\n    for s in scores:\n        total += s\n    return total\n\nprint(total_threat([10, 20, 5]))  # 35`,
+    task:'Write a function "calc_threat" that takes a list and returns the sum. Test with [10, 20, 30].',
+    starter:`# Write your threat calculator\ndef calc_threat(scores):\n    # Your code here\n    pass\n\nprint(calc_threat([10, 20, 30]))`,
+    check: (out) => out.trim() === '60',
+    hint:'Loop through scores, add each to a running total variable, then return the total',
+    successMsg:'💀 GHOST//BYTE NEUTRALIZED! Network secured! You\'ve mastered Python and saved the grid. ELITE HACKER STATUS ACHIEVED.',
+    failMsg:'Loop through the scores list, accumulate a total, then return it. The answer should be 60!'
+  }
+];
+
+// ===== GAME STATE =====
+const SAVE_KEY = 'pythonquest_save_v1';
+
+const DEFAULT_STATE = {
+  currentIdx: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  bestStreak: 0,
+  solved: [],
+  badges: [],
+  lastPlayed: null
+};
+
+function saveState() {
+  const toSave = Object.assign({}, state, { lastPlayed: new Date().toISOString() });
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(toSave)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        currentIdx:  parsed.currentIdx  ?? 0,
+        xp:          parsed.xp          ?? 0,
+        level:       parsed.level       ?? 1,
+        streak:      parsed.streak      ?? 0,
+        bestStreak:  parsed.bestStreak  ?? 0,
+        solved:      Array.isArray(parsed.solved)  ? [...parsed.solved]  : [],
+        badges:      Array.isArray(parsed.badges)  ? [...parsed.badges]  : [],
+        lastPlayed:  parsed.lastPlayed  ?? null
+      };
+    }
+  } catch(e) {}
+  return {
+    currentIdx: 0, xp: 0, level: 1,
+    streak: 0, bestStreak: 0,
+    solved: [], badges: [], lastPlayed: null
+  };
+}
+
+function resetSave() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+  state = {
+    currentIdx: 0,
+    xp: 0,
+    level: 1,
+    streak: 0,
+    bestStreak: 0,
+    solved: [],
+    badges: [],
+    lastPlayed: null
+  };
+  selectedMCQ = -1;
+}
+
+function showResetModal() {
+  playSound('click');
+  document.getElementById('reset-overlay').classList.add('show');
+}
+
+function hideResetModal() {
+  document.getElementById('reset-overlay').classList.remove('show');
+}
+
+function executeReset() {
+  hideResetModal();
+  resetSave();
+  state.currentIdx = 0;
+  selectedMCQ = -1;
+  updateHUD();
+  renderBadges();
+  renderNav();
+  renderDots();
+  renderChallenge();
+  refreshWelcomeSaveUI();
+  hideFeedback();
+  playSound('start');
+  spawnParticles('🔄', 6);
+  showToast('🗑️ Agent data wiped. Starting from Mission 1.');
+}
+
+function confirmReset() {
+  showResetModal();
+}
+
+// ── Declare state BEFORE any function that uses it ──
+let state = loadState();
+let selectedMCQ = -1;
+
+const XP_PER_LEVEL = [0, 100, 250, 450, 700, 1000];
+const LEVEL_NAMES = ['', 'Script Rookie', 'Cyber Apprentice', 'Code Defender', 'Security Engineer', 'Elite Hacker'];
+const LEVEL_AVATARS = ['', '🖥️', '🔐', '🛡️', '💻', '💀'];
+const LEVEL_TITLES = ['','The New Recruit','The Firewall Cadet','The Encryption Specialist','The Network Defender','The Ghost Hunter'];
+
+const BADGES_DEF = [
+  { id:'first',    emoji:'🎯', label:'First Blood',     desc:'Complete your first mission' },
+  { id:'streak3',  emoji:'🔥', label:'On Fire',         desc:'3 missions correct in a row' },
+  { id:'streak5',  emoji:'⚡', label:'Unstoppable',     desc:'5 missions correct in a row' },
+  { id:'level2',   emoji:'🔐', label:'Clearance Level 2', desc:'Reach Level 2' },
+  { id:'level3',   emoji:'🛡️', label:'Clearance Level 3', desc:'Reach Level 3' },
+  { id:'world1',   emoji:'🖥️', label:'Boot Camp Clear', desc:'Complete Boot Camp' },
+  { id:'world2',   emoji:'🔒', label:'Firewall Online',  desc:'Complete Firewall Protocol' },
+  { id:'debugger', emoji:'🐛', label:'Bug Exterminator', desc:'Fix the corrupted firewall' },
+  { id:'master',   emoji:'💀', label:'Elite Hacker',    desc:'Complete all missions' }
+];
+
+// ===== PYTHON INTERPRETER =====
+function runPython(code) {
+  const output = [];
+  const errors = [];
+
+  // Build a safe execution environment
+  const env = {
+    __output: output,
+    __error: errors,
+  };
+
+  // Replace print calls
+  let transformed = code;
+
+  // Handle basic Python→JS transformations
+  try {
+    // Simple Python evaluator for educational purposes
+    const result = evalPython(code, output);
+    return { output: output.join('\n'), error: null };
+  } catch(e) {
+    return { output: '', error: e.message };
+  }
+}
+
+function evalPython(code, output) {
+  // Step 1: convert indentation blocks to braces FIRST, before any regex replacements
+  let js = indentToBraces(code);
+
+  // Step 2: remove comments
+  js = js.replace(/#[^\n]*/g, '');
+
+  // Step 3: print()
+  js = js.replace(/print\(([^)]*)\)/g, (match, args) => `__print__(${args})`);
+
+  // Step 4: True/False/None
+  js = js.replace(/\bTrue\b/g, 'true');
+  js = js.replace(/\bFalse\b/g, 'false');
+  js = js.replace(/\bNone\b/g, 'null');
+
+  // Step 5: for loops with range
+  js = js.replace(/for\s+(\w+)\s+in\s+range\s*\(\s*(\d+)\s*\)\s*\{/g,
+    (m, v, n) => `for(let ${v}=0; ${v}<${n}; ${v}++){`);
+  js = js.replace(/for\s+(\w+)\s+in\s+range\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)\s*\{/g,
+    (m, v, s, e) => `for(let ${v}=${s}; ${v}<${e}; ${v}++){`);
+
+  // Step 6: for x in list
+  js = js.replace(/for\s+(\w+)\s+in\s+(\w+)\s*\{/g,
+    (m, v, arr) => `for(let __i=0;__i<${arr}.length;__i++){let ${v}=${arr}[__i];`);
+
+  // Step 7: while
+  js = js.replace(/while\s+(.+?)\s*\{/g, (m, cond) => `while(${cond}){`);
+
+  // Step 8: elif (must come before if)
+  js = js.replace(/\}\s*elif\s+(.+?)\s*\{/g, (m, cond) => `} else if(${cond}){`);
+
+  // Step 9: else
+  js = js.replace(/\}\s*else\s*\{/g, '} else {');
+
+  // Step 10: if
+  js = js.replace(/\bif\s+(.+?)\s*\{/g, (m, cond) => `if(${cond}){`);
+
+  // Step 11: def
+  js = js.replace(/def\s+(\w+)\s*\((.*?)\)\s*\{/g, (m, name, params) => `function ${name}(${params}){`);
+
+  // Step 12: pass — only as a standalone statement on its own line
+  js = js.replace(/^\s*pass\s*$/mg, '');
+
+  // Step 13: type() and len()
+  js = js.replace(/type\(([^)]+)\)/g, (m, val) => `__type__(${val})`);
+  js = js.replace(/\blen\s*\(([^)]+)\)/g, (m, val) => `${val}.length`);
+
+  // Execute
+  const fn = new Function('__print__', '__type__', js + '\nreturn null;');
+  fn(
+    (...args) => {
+      const str = args.map(a => {
+        if (a === true) return 'True';
+        if (a === false) return 'False';
+        if (a === null) return 'None';
+        if (Array.isArray(a)) return '[' + a.map(x => typeof x === 'string' ? `'${x}'` : x).join(', ') + ']';
+        return String(a);
+      }).join('');
+      output.push(str);
+    },
+    (val) => {
+      if (typeof val === 'boolean') return "<class 'bool'>";
+      if (typeof val === 'number') return Number.isInteger(val) ? "<class 'int'>" : "<class 'float'>";
+      if (typeof val === 'string') return "<class 'str'>";
+      if (Array.isArray(val)) return "<class 'list'>";
+      return "<class 'object'>";
+    }
+  );
+}
+
+function indentToBraces(code) {
+  const lines = code.split('\n');
+  const result = [];
+  const indentStack = [0];
+
+  // Patterns that open a new indented block in Python
+  const blockOpeners = /^(if |elif |else:|else$|for |while |def |try:|except|finally:)/;
+  // Patterns that continue a block (need a closing } before them)
+  const blockContinuers = /^(else:|else$|elif |except|finally:)/;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) { result.push(''); continue; }
+
+    const indent = line.match(/^(\s*)/)[1].length;
+    const content = line.trim();
+
+    // Close braces when indentation decreases
+    while (indentStack.length > 1 && indent < indentStack[indentStack.length - 1]) {
+      indentStack.pop();
+      // If this line is a block-continuer (else/elif), emit the closing } inline
+      if (blockContinuers.test(content)) {
+        // Will be handled below — just pop the stack, don't emit standalone }
+        break;
+      }
+      result.push(' '.repeat(indent) + '}');
+    }
+
+    // Emit the line, appending { if it's a block opener ending with :
+    if (content.endsWith(':') && blockOpeners.test(content)) {
+      // Block continuers (else/elif) need a closing } prepended
+      if (blockContinuers.test(content)) {
+        const keyword = content.slice(0, -1).trim(); // strip trailing :
+        result.push(' '.repeat(indent) + '} ' + keyword + ' {');
+      } else {
+        result.push(' '.repeat(indent) + content.slice(0, -1).trim() + ' {');
+      }
+      indentStack.push(indent + 4);
+    } else {
+      result.push(line);
+    }
+  }
+
+  // Close any remaining open braces
+  while (indentStack.length > 1) {
+    indentStack.pop();
+    result.push('}');
+  }
+
+  return result.join('\n');
+}
+
+// ===== RENDER FUNCTIONS =====
+function renderChallenge() {
+  const ch = CHALLENGES[state.currentIdx];
+  if (!ch) return;
+
+  // Update header
+  document.getElementById('ch-emoji').textContent = ch.emoji;
+  document.getElementById('ch-title').textContent = ch.title;
+  document.getElementById('ch-world-name').textContent = ch.world;
+  // Update breadcrumb sector number
+  const breadcrumb = document.querySelector('.ch-breadcrumb');
+  if (breadcrumb) breadcrumb.innerHTML = `Sector ${ch.worldNum} › <span id="ch-world-name">${ch.world}</span>`;
+
+  const badgeEl = document.getElementById('ch-badge');
+  badgeEl.textContent = ch.difficulty;
+  badgeEl.className = 'ch-badge badge-' + ch.difficulty.toLowerCase();
+
+  // ── LESSON PANEL ──
+  const lessonPanel = document.getElementById('lesson-content');
+  lessonPanel.innerHTML = `
+    <div class="story-box">
+      <div class="narrator">📡 MISSION BRIEFING</div>
+      ${ch.story}
+    </div>
+    <div class="lesson-cards-row">
+      <div class="lesson-box">
+        <div class="box-title">💾 INTEL REPORT</div>
+        <div class="lesson-text">${(ch.lesson || '').replace(/\n/g,'<br>')}</div>
+        ${ch.code_example ? `<pre class="code-example">${ch.code_example}</pre>` : ''}
+      </div>
+      <div class="lesson-box">
+        <div class="box-title">🎯 MISSION OBJECTIVE</div>
+        <div class="lesson-text" style="color:var(--accent3);font-weight:600;">${ch.task}</div>
+        <div style="margin-top:12px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">XP REWARD</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--gold);">+${ch.xp} ⭐</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ── CHALLENGE PANEL ──
+  const challengePanel = document.getElementById('challenge-content');
+
+  let challengeHTML = `
+    <div class="mission-strip">
+      <div class="ms-label">🎯 TASK</div>
+      <div class="ms-text">${ch.task}</div>
+    </div>
+  `;
+
+  if (ch.type === 'code') {
+    challengeHTML += `
+      <div class="editor-section">
+        <div class="editor-topbar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="editor-filename">quest_${ch.id}.py</div>
+          <div class="editor-actions">
+            <button class="hint-inline-btn" onclick="toggleHintDrawer()">💡 Hint</button>
+            <button class="btn-reset" onclick="resetCode()">↺ Reset</button>
+            <button class="btn-run" onclick="runCode()">▶ RUN &nbsp;(Ctrl+↵)</button>
+          </div>
+        </div>
+        <textarea id="code-editor" spellcheck="false" placeholder="# Write your Python code here...">${ch.starter || ''}</textarea>
+        <div class="output-section">
+          <div class="output-label">$ OUTPUT:</div>
+          <div id="output-display" class="output-info">— Press RUN to execute your code —</div>
+        </div>
+      </div>
+      <div class="hint-drawer" id="hint-drawer">💡 <strong>Hint:</strong> ${ch.hint}</div>
+    `;
+  } else if (ch.type === 'mcq') {
+    const letters = ['A', 'B', 'C', 'D'];
+    challengeHTML += `
+      <div class="mcq-challenge-wrap">
+        <div class="mcq-options" id="mcq-options">
+          ${ch.options.map((opt,i) => `
+            <div class="mcq-option" onclick="selectMCQ(${i})" id="mcq-${i}">
+              <div class="mcq-letter">${letters[i]}</div>
+              ${opt}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="hint-drawer" id="hint-drawer">💡 <strong>Hint:</strong> ${ch.hint}</div>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button class="hint-inline-btn" onclick="toggleHintDrawer()" style="flex-shrink:0;">💡 Hint</button>
+        <button class="btn-run" style="flex:1;" onclick="submitMCQ()">✓ SUBMIT ANSWER</button>
+      </div>
+    `;
+  } else if (ch.type === 'fillblank') {
+    challengeHTML += `
+      <div class="mcq-challenge-wrap" style="justify-content:flex-start;">
+        <div class="lesson-box" style="flex-shrink:0;">
+          <div class="box-title">✏️ FILL IN THE BLANK</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:15px;background:rgba(0,0,0,0.3);border-radius:8px;padding:16px;line-height:2.2;margin-top:8px;">
+            <span style="color:#a0f0b0;">${ch.blank_prefix}</span>
+            <input type="text" id="blank-input" class="fill-blank-input"
+              style="width:140px;display:inline-block;padding:4px 12px;margin:0 6px;vertical-align:middle;"
+              placeholder="???" onkeypress="if(event.key==='Enter')submitFill()">
+            <span style="color:#a0f0b0;">${ch.blank_suffix}</span>
+          </div>
+        </div>
+      </div>
+      <div class="hint-drawer" id="hint-drawer">💡 <strong>Hint:</strong> ${ch.hint}</div>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button class="hint-inline-btn" onclick="toggleHintDrawer()" style="flex-shrink:0;">💡 Hint</button>
+        <button class="btn-run" style="flex:1;" onclick="submitFill()">✓ SUBMIT ANSWER</button>
+      </div>
+    `;
+  }
+
+  challengePanel.innerHTML = challengeHTML;
+
+  // Switch to lesson tab for a new challenge
+  switchTab('lesson');
+
+  // Update nav
+  renderNav();
+  renderDots();
+}
+
+function switchTab(tab) {
+  playSound('click');
+  document.getElementById('tab-lesson').classList.toggle('active', tab === 'lesson');
+  document.getElementById('tab-challenge').classList.toggle('active', tab === 'challenge');
+  document.getElementById('tab-lesson-btn').classList.toggle('active', tab === 'lesson');
+  document.getElementById('tab-challenge-btn').classList.toggle('active', tab === 'challenge');
+}
+
+function toggleHintDrawer() {
+  playSound('click');
+  const d = document.getElementById('hint-drawer');
+  if (d) d.classList.toggle('show');
+}
+
+function selectMCQ(i) {
+  playSound('click');
+  selectedMCQ = i;
+  document.querySelectorAll('.mcq-option').forEach((el,j) => {
+    el.classList.toggle('selected', j === i);
+  });
+}
+
+function submitMCQ() {
+  if (selectedMCQ === -1) { showToast('Please select an answer!'); return; }
+  const ch = CHALLENGES[state.currentIdx];
+  if (selectedMCQ === ch.answer) {
+    document.getElementById('mcq-' + selectedMCQ).classList.add('correct');
+    onCorrect(ch);
+  } else {
+    document.getElementById('mcq-' + selectedMCQ).classList.add('wrong');
+    document.getElementById('mcq-' + ch.answer).classList.add('correct');
+    onWrong(ch);
+  }
+  document.querySelectorAll('.mcq-option').forEach(el => el.style.pointerEvents='none');
+}
+
+function submitFill() {
+  const ch = CHALLENGES[state.currentIdx];
+  const val = document.getElementById('blank-input').value.trim().toLowerCase();
+  if (val === ch.answer.toLowerCase()) {
+    onCorrect(ch);
+  } else {
+    onWrong(ch);
+  }
+}
+
+function runCode() {
+  playSound('run');
+  const code = document.getElementById('code-editor').value;
+  const ch = CHALLENGES[state.currentIdx];
+  const display = document.getElementById('output-display');
+
+  const result = runPython(code);
+
+  if (result.error) {
+    display.className = 'output-error';
+    display.textContent = '❌ Error: ' + result.error;
+    onWrong(ch);
+    return;
+  }
+
+  display.className = 'output-success';
+  display.textContent = result.output || '(no output)';
+
+  if (ch.check(result.output)) {
+    onCorrect(ch);
+  } else {
+    onWrong(ch);
+  }
+}
+
+function resetCode() {
+  const ch = CHALLENGES[state.currentIdx];
+  const editor = document.getElementById('code-editor');
+  if (editor) editor.value = ch.starter || '';
+  const display = document.getElementById('output-display');
+  if (display) { display.className = 'output-info'; display.textContent = '— Press RUN to execute your code —'; }
+}
+
+// ===== GAME LOGIC =====
+function onCorrect(ch) {
+  // Check already solved
+  if (state.solved.includes(ch.id)) {
+    showFeedback(true, ch, 0, true);
+    return;
+  }
+
+  state.solved.push(ch.id);
+  state.streak++;
+  if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+  const xpGained = ch.xp;
+  state.xp += xpGained;
+
+  // Check level up
+  const newLevel = calcLevel(state.xp);
+  const leveledUp = newLevel > state.level;
+  if (leveledUp) state.level = newLevel;
+
+  // Check badges
+  checkBadges(ch);
+
+  updateHUD();
+  renderNav();
+  renderDots();
+  spawnParticles('✅', 8);
+  playSound('correct');
+  setTimeout(() => playSound('xp'), 420);
+
+  saveState();
+  showFeedback(true, ch, xpGained, false);
+  if (leveledUp) {
+    setTimeout(() => { playSound('levelup'); showLevelUp(); }, 1500);
+  }
+
+  // Update stats
+  document.getElementById('stat-solved').textContent = state.solved.length;
+  document.getElementById('stat-streak').textContent = state.bestStreak;
+}
+
+function onWrong(ch) {
+  state.streak = 0;
+  playSound('wrong');
+  saveState();
+  updateHUD();
+  showFeedback(false, ch, 0, false);
+}
+
+function checkBadges(ch) {
+  const toAdd = [];
+  if (state.solved.length === 1) toAdd.push('first');
+  if (state.streak >= 3) toAdd.push('streak3');
+  if (state.streak >= 5) toAdd.push('streak5');
+  if (state.level >= 2) toAdd.push('level2');
+  if (state.level >= 3) toAdd.push('level3');
+  if (ch.id === 5 && state.solved.includes(5)) toAdd.push('world1');
+  if (ch.id === 9 && state.solved.includes(9)) toAdd.push('world2');
+  if (ch.id === 16) toAdd.push('debugger');
+  if (state.solved.length >= CHALLENGES.length) toAdd.push('master');
+
+  toAdd.forEach(b => {
+    if (!state.badges.includes(b)) {
+      state.badges.push(b);
+      spawnParticles('🏆', 5);
+      setTimeout(() => playSound('badge'), 200);
+    }
+  });
+  renderBadges();
+}
+
+function calcLevel(xp) {
+  for (let i = XP_PER_LEVEL.length-1; i >= 1; i--) {
+    if (xp >= XP_PER_LEVEL[i]) return i;
+  }
+  return 1;
+}
+
+function updateHUD() {
+  document.getElementById('hud-level').textContent = state.level;
+  document.getElementById('hud-xp').textContent = state.xp;
+
+  const streakEl = document.getElementById('hud-streak');
+  streakEl.textContent = state.streak;
+  streakEl.parentElement.querySelector('.icon').textContent = state.streak >= 3 ? '🔥' : '⚡';
+
+  // XP bar
+  const curLevelXP = XP_PER_LEVEL[state.level] || 0;
+  const nextLevelXP = XP_PER_LEVEL[state.level + 1] || curLevelXP + 200;
+  const pct = Math.min(100, ((state.xp - curLevelXP) / (nextLevelXP - curLevelXP)) * 100);
+  document.getElementById('xp-bar').style.width = pct + '%';
+  document.getElementById('xp-label').textContent = state.xp + ' / ' + nextLevelXP + ' XP';
+
+  // Character
+  document.getElementById('char-avatar').textContent = LEVEL_AVATARS[state.level] || '🐣';
+  document.getElementById('char-name').textContent = LEVEL_NAMES[state.level] || 'Novice Coder';
+  document.getElementById('char-title').textContent = LEVEL_TITLES[state.level] || '';
+}
+
+function renderNav() {
+  const nav = document.getElementById('challenge-nav');
+  nav.innerHTML = CHALLENGES.map((ch, i) => {
+    const done = state.solved.includes(ch.id);
+    const active = i === state.currentIdx;
+    return `
+      <div class="challenge-nav-item ${active?'active':''} ${done?'done':''}" onclick="goToChallenge(${i})">
+        <div class="ch-icon">${ch.emoji}</div>
+        <div class="ch-info">
+          <div class="ch-name">${ch.title}</div>
+          <div class="ch-pts">${ch.xp} XP · ${ch.difficulty}</div>
+        </div>
+        <div class="ch-check">${done?'✅':'○'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDots() {
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = CHALLENGES.map((ch, i) => {
+    const done = state.solved.includes(ch.id);
+    const active = i === state.currentIdx;
+    return `<div class="prog-dot ${done?'done':''} ${active?'active':''}" onclick="goToChallenge(${i})" title="${ch.title}"></div>`;
+  }).join('');
+}
+
+function renderBadges() {
+  const grid = document.getElementById('badge-grid');
+  grid.innerHTML = BADGES_DEF.map(b => {
+    const earned = state.badges.includes(b.id);
+    return `<div class="badge ${earned?'earned':'locked'}" title="${b.label}: ${b.desc}">${b.emoji}</div>`;
+  }).join('');
+}
+
+function goToChallenge(i) {
+  state.currentIdx = i;
+  selectedMCQ = -1;
+  playSound('click');
+  saveState();
+  hideFeedback();
+  renderChallenge();
+  switchTab('lesson');
+}
+
+function nextChallenge() {
+  hideFeedback();
+  if (state.currentIdx < CHALLENGES.length - 1) {
+    state.currentIdx++;
+    selectedMCQ = -1;
+    playSound('next');
+    saveState();
+    renderChallenge();
+    switchTab('lesson');
+  } else {
+    showToast('💀 ALL MISSIONS COMPLETE! GHOST//BYTE has been neutralized. You are an Elite Hacker!');
+  }
+}
+
+// ===== FEEDBACK =====
+function showFeedback(success, ch, xpGained, alreadySolved) {
+  const panel = document.getElementById('feedback-panel');
+  document.getElementById('fb-icon').textContent = success ? '✅' : '❌';
+  document.getElementById('fb-title').textContent = success ? (alreadySolved ? 'ALREADY SOLVED!' : 'CORRECT!') : 'NOT QUITE!';
+  document.getElementById('fb-msg').textContent = success ? ch.successMsg : ch.failMsg;
+  document.getElementById('fb-xp').textContent = success && !alreadySolved ? `+${xpGained} XP earned! 🌟` : (alreadySolved ? 'Already solved — no XP' : 'Keep trying! You\'ve got this!');
+
+  const nextBtn = document.getElementById('btn-next');
+  if (!success) {
+    nextBtn.textContent = '↩ TRY AGAIN';
+    nextBtn.onclick = () => hideFeedback();
+  } else {
+    nextBtn.textContent = '▶ NEXT MISSION';
+    nextBtn.onclick = () => nextChallenge();
+  }
+
+  panel.className = 'feedback-panel show ' + (success ? 'success' : 'fail');
+}
+
+function hideFeedback() {
+  document.getElementById('feedback-panel').className = 'feedback-panel';
+}
+
+function showLevelUp() {
+  const overlay = document.getElementById('levelup-overlay');
+  document.getElementById('lu-sub').textContent = `You've reached Level ${state.level}!`;
+  document.getElementById('lu-new').textContent = `🎖️ New rank: ${LEVEL_NAMES[state.level]}`;
+  overlay.classList.add('show');
+  spawnParticles('⭐', 15);
+  spawnParticles('🎉', 10);
+}
+
+function dismissLevelUp() {
+  document.getElementById('levelup-overlay').classList.remove('show');
+}
+
+// ===== PARTICLES =====
+function spawnParticles(emoji, count) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.textContent = emoji;
+      p.style.left = (20 + Math.random() * 60) + 'vw';
+      p.style.top = (30 + Math.random() * 40) + 'vh';
+      p.style.animationDelay = Math.random() * 0.3 + 's';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1200);
+    }, i * 80);
+  }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);border-radius:8px;padding:12px 24px;font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--accent);z-index:500;white-space:nowrap;box-shadow:0 0 20px rgba(0,229,255,0.3);transition:all 0.3s;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),400); }, 2500);
+}
+
+// ===== SCREEN MANAGEMENT =====
+function startGame(difficulty) {
+  // If no save exists and starting as apprentice, jump to challenge 5
+  if (!localStorage.getItem(SAVE_KEY) && difficulty === 'apprentice') {
+    state.currentIdx = 5;
+  }
+  playSound('start');
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('game').classList.add('active');
+  updateHUD();
+  renderBadges();
+  renderNav();
+  renderChallenge();
+}
+
+function continueGame() {
+  playSound('start');
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('game').classList.add('active');
+  updateHUD();
+  renderBadges();
+  renderNav();
+  renderChallenge();
+  const ch = CHALLENGES[state.currentIdx];
+  showToast(`👋 Welcome back, Agent! Resuming: ${ch ? ch.title : 'your mission'}`);
+}
+
+function showWelcome() {
+  saveState();
+  document.getElementById('game').classList.remove('active');
+  document.getElementById('welcome').classList.add('active');
+  refreshWelcomeSaveUI();
+}
+
+function refreshWelcomeSaveUI() {
+  const hasSave = !!localStorage.getItem(SAVE_KEY);
+  const continueBtn = document.getElementById('btn-continue-save');
+  const saveInfo = document.getElementById('save-info');
+
+  if (hasSave && state.solved.length > 0) {
+    const ch = CHALLENGES[state.currentIdx];
+    const pct = Math.round((state.solved.length / CHALLENGES.length) * 100);
+    const lastDate = state.lastPlayed ? new Date(state.lastPlayed).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    continueBtn.style.display = 'flex';
+    saveInfo.style.display = 'block';
+    saveInfo.innerHTML = `
+      <span class="save-dot"></span>
+      <span>Level ${state.level} · ${state.xp} XP · ${state.solved.length}/${CHALLENGES.length} solved (${pct}%)</span>
+      ${lastDate ? `<span class="save-date">Last played: ${lastDate}</span>` : ''}
+    `;
+    if (ch) continueBtn.querySelector('.continue-label').textContent = `▶ CONTINUE — ${ch.title}`;
+  } else {
+    continueBtn.style.display = 'none';
+    saveInfo.style.display = 'none';
+  }
+}
+
+// ===== SOUND ENGINE (Web Audio API — no files needed) =====
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playSound(type) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    switch(type) {
+      case 'correct':   soundCorrect(ctx);   break;
+      case 'wrong':     soundWrong(ctx);     break;
+      case 'run':       soundRun(ctx);       break;
+      case 'levelup':   soundLevelUp(ctx);   break;
+      case 'badge':     soundBadge(ctx);     break;
+      case 'click':     soundClick(ctx);     break;
+      case 'start':     soundStart(ctx);     break;
+      case 'next':      soundNext(ctx);      break;
+      case 'xp':        soundXP(ctx);        break;
+    }
+  } catch(e) {}
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('sound-toggle');
+  if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+  if (soundEnabled) playSound('click');
+  showToast(soundEnabled ? '🔊 Sound On' : '🔇 Sound Off');
+}
+
+// ── Individual sound functions ──
+
+function soundCorrect(ctx) {
+  // Triumphant ascending chime
+  const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1);
+    gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.1);
+    gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + i * 0.1 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.35);
+    osc.start(ctx.currentTime + i * 0.1);
+    osc.stop(ctx.currentTime + i * 0.1 + 0.36);
+  });
+  // Sparkle layer
+  setTimeout(() => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(2093, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1046, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.26);
+  }, 350);
+}
+
+function soundWrong(ctx) {
+  // Low descending buzz
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const distort = ctx.createWaveShaper();
+  const curve = new Float32Array(256);
+  for (let i = 0; i < 256; i++) curve[i] = (i < 128) ? -1 : 1;
+  distort.curve = curve;
+  osc.connect(distort); distort.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(220, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.18, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.41);
+  // Second thud
+  const osc2 = ctx.createOscillator();
+  const gain2 = ctx.createGain();
+  osc2.connect(gain2); gain2.connect(ctx.destination);
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(130, ctx.currentTime + 0.15);
+  gain2.gain.setValueAtTime(0.2, ctx.currentTime + 0.15);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+  osc2.start(ctx.currentTime + 0.15); osc2.stop(ctx.currentTime + 0.46);
+}
+
+function soundRun(ctx) {
+  // Soft keyboard click + whoosh
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(880, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.13);
+}
+
+function soundLevelUp(ctx) {
+  // Epic fanfare
+  const melody = [
+    [523.25, 0],    // C5
+    [659.25, 0.12], // E5
+    [783.99, 0.24], // G5
+    [1046.50, 0.38],// C6
+    [1318.51, 0.55],// E6
+    [1567.98, 0.75],// G6
+  ];
+  melody.forEach(([freq, t]) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + t);
+    gain.gain.setValueAtTime(0, ctx.currentTime + t);
+    gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.5);
+    osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + 0.51);
+  });
+  // Deep bass hit
+  const bass = ctx.createOscillator();
+  const bassGain = ctx.createGain();
+  bass.connect(bassGain); bassGain.connect(ctx.destination);
+  bass.type = 'sine';
+  bass.frequency.setValueAtTime(65, ctx.currentTime + 0.75);
+  bassGain.gain.setValueAtTime(0.35, ctx.currentTime + 0.75);
+  bassGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.4);
+  bass.start(ctx.currentTime + 0.75); bass.stop(ctx.currentTime + 1.41);
+}
+
+function soundBadge(ctx) {
+  // Magical sparkle trill
+  const freqs = [1046, 1318, 1568, 2093, 1568, 2093];
+  freqs.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.07);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.07);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.18);
+    osc.start(ctx.currentTime + i * 0.07); osc.stop(ctx.currentTime + i * 0.07 + 0.19);
+  });
+}
+
+function soundClick(ctx) {
+  // Subtle UI tick
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, ctx.currentTime);
+  gain.gain.setValueAtTime(0.08, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.07);
+}
+
+function soundStart(ctx) {
+  // Game start swoosh + chord
+  const chord = [261.63, 329.63, 392.00]; // C4 E4 G4
+  chord.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq * 0.5, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.81);
+  });
+}
+
+function soundNext(ctx) {
+  // Soft forward whoosh
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(400, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.21);
+}
+
+function soundXP(ctx) {
+  // Coin collect ding
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(987.77, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1975.53, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.22, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.26);
+}
+
+// Tab key support in editor
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    hideResetModal();
+  }
+  if (e.target && e.target.id === 'code-editor') {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      e.target.value = e.target.value.substring(0, start) + '    ' + e.target.value.substring(end);
+      e.target.selectionStart = e.target.selectionEnd = start + 4;
+    }
+    if (e.ctrlKey && e.key === 'Enter') {
+      runCode();
+    }
+  }
+});
+
+// Save on page hide (tab close, navigate away)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') saveState();
+});
+
+// Init welcome screen save UI on load
+window.addEventListener('load', () => {
+  refreshWelcomeSaveUI();
+});
+</script>
+<!-- Reset Confirmation Modal -->
+<div class="reset-overlay" id="reset-overlay" onclick="hideResetModal()">
+  <div class="reset-modal" onclick="event.stopPropagation()">
+    <div class="reset-icon">⚠️</div>
+    <div class="reset-title">WIPE AGENT DATA?</div>
+    <div class="reset-msg">
+      This will permanently erase all progress:<br>
+      <span class="reset-detail">XP · Level · Completed Missions · Badges · Streak</span><br><br>
+      You will restart from <strong>Mission 1</strong>. This cannot be undone.
+    </div>
+    <div class="reset-btns">
+      <button class="reset-btn-cancel" onclick="hideResetModal()">✕ CANCEL</button>
+      <button class="reset-btn-confirm" onclick="executeReset()">🗑️ WIPE &amp; RESTART</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .reset-overlay {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.88);
+    display:flex; align-items:center; justify-content:center;
+    z-index:400; opacity:0; pointer-events:none;
+    transition:opacity 0.25s;
+  }
+  .reset-overlay.show { opacity:1; pointer-events:all; }
+  .reset-modal {
+    background: linear-gradient(160deg, #141200 0%, #0a0900 60%, #141200 100%);
+    border:1px solid #cc3333;
+    border-radius:4px;
+    padding:40px 48px;
+    max-width:440px; width:calc(100vw - 40px);
+    text-align:center;
+    box-shadow: 0 0 50px rgba(180,30,30,0.25), 0 0 100px rgba(180,30,30,0.1), inset 0 1px 0 rgba(201,168,76,0.06);
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+    position:relative; overflow:hidden;
+  }
+  /* Gold top rule */
+  .reset-modal::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:1px;
+    background: var(--gold-gradient-h);
+  }
+  .reset-icon { font-size:44px; margin-bottom:14px; }
+  .reset-title {
+    font-family:'Cinzel Decorative',serif;
+    font-size:clamp(13px,2.5vw,18px);
+    background: var(--gold-gradient);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    letter-spacing:3px; margin-bottom:18px;
+    filter: drop-shadow(0 0 10px rgba(201,168,76,0.3));
+  }
+  .reset-msg {
+    font-size:14px; color:#9a8a6a; line-height:1.8; margin-bottom:28px;
+  }
+  .reset-msg strong { color:var(--accent2); }
+  .reset-detail {
+    font-family:'Share Tech Mono',monospace; font-size:12px;
+    color:var(--muted); letter-spacing:1px;
+    background:rgba(0,0,0,0.3); border:1px solid #2a2010;
+    border-radius:3px; padding:4px 10px; display:inline-block; margin:4px 0;
+  }
+  .reset-btns { display:flex; gap:12px; justify-content:center; }
+  .reset-btn-cancel {
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:2px; text-transform:uppercase;
+    background:none; border:1px solid #2a2010; color:var(--muted);
+    border-radius:3px; padding:12px 24px; cursor:pointer;
+    transition:all 0.2s; flex:1;
+  }
+  .reset-btn-cancel:hover { border-color:var(--accent); color:var(--accent2); }
+  .reset-btn-confirm {
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; font-weight:700;
+    background:linear-gradient(135deg, #8b0000, #cc3333);
+    color:#fff; border:none; border-radius:3px; padding:12px 24px; cursor:pointer;
+    box-shadow:0 0 18px rgba(180,30,30,0.4); transition:all 0.2s; flex:1;
+  }
+  .reset-btn-confirm:hover { transform:scale(1.03); box-shadow:0 0 28px rgba(200,50,50,0.6); }
+</style>
+
+</body>
+</html>
